@@ -11,35 +11,37 @@
 # one individual of the opposite gender.
 
 # Simplified first try
-MEN = [1,2,3]
-WOMEN = [1,2,3]
+men = [0,1,2]
+women = [0,1,2]
 
 # All are single at the beginning
-men_married_status = [False, False, False]
-women_married_status = [False, False, False]
+engaged_men = [False, False, False]
+engaged_women = [False, False, False]
 
 # Preference lists (in ordered form)
-men_preferences = [[1,2,3], [3,1,2], [2,1,3]]
-women_preferences = [[3,2,1], [3,1,2], [2,3,1]]
+men_pref = [[1,2,0], [0,1,2], [2,1,0]]
+women_pref = [[0,2,1], [0,1,2], [2,0,1]]
+
+# Men who proposed
+men_prop_women = [[False, False, False], [False, False, False], [False, False, False]]
 
 # List of tuples (man, woman)
 engaged_pairs = []
 
 # This is pretty much pseudocode
 def matching_couples(engaged_pairs):
-    while there_are_singles():
-        man = select_single_man()
-        woman = preferred_woman(man)
-        if is_free(woman):
-            engage(man, woman)
-        else:
-            other_man = get_man(woman)
-            if rank(other_man, man) > 0:
-                pass
+    while False in engaged_men:
+        man = men[engaged_men.index(False)]
+        preferred_women = women_pref[man]
+        for elem in preferred_women:
+            if not men_prop_women[elem]:
+                woman = women[elem]
+                men_prop_women[man][elem] = True
+                if not engaged_women[woman]:
+                    engage(man, woman)
             else:
-                engage(man, woman)
-                free(other_man)
-    return modified_engaged_pairs
-
-def there_are_singles():
-    pass
+                other_man = get_man(woman)
+                if ranking(man, other_man) > 0:
+                    engage(man, woman)
+                break
+    return engaged_pairs
