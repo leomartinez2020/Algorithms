@@ -29,7 +29,7 @@ men_prop_women = [[False, False, False], [False, False, False], [False, False, F
 engaged_pairs = []
 
 # This is pretty much pseudocode
-def matching_couples(engaged_pairs):
+def matching_couples():
     while False in engaged_men:
         man = men[engaged_men.index(False)]
         preferred_women = women_pref[man]
@@ -39,9 +39,24 @@ def matching_couples(engaged_pairs):
                 men_prop_women[man][elem] = True
                 if not engaged_women[woman]:
                     engage(man, woman)
+                    break
+            # if woman is engaged:
             else:
                 other_man = get_man(woman)
-                if ranking(man, other_man) > 0:
+                if ranking(woman, man, other_man):
                     engage(man, woman)
-                break
-    return engaged_pairs
+                    break
+    print(engaged_pairs)
+    print("Job done!")
+
+def engage(man, woman):
+    engaged_pairs.append((man, woman))
+
+def ranking(woman, man1, man2):
+    rank = women_pref[woman]
+    return rank.index(man1) < rank.index(man2)
+
+def get_man(woman):
+    pass
+
+matching_couples()
