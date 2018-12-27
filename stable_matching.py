@@ -10,53 +10,58 @@
 # case we are considering, everyone is seeking to be paired with exactly
 # one individual of the opposite gender.
 
-# Simplified first try
-men = [0,1,2]
-women = [0,1,2]
+from random import sample
 
-# All are single at the beginning
-engaged_men = [False, False, False]
-engaged_women = [False, False, False]
+class StableMatch:
+    def __init__(self, quantity):
+        self.quantity = quantity
+        self.men = range(quantity)
+        self.women = range(quantity)
+        self.engaged_men = [False] * quantity
+        self.engaged_women = [False] * quantity
+        self.engaged_pairs = {}
+        self.men_preferences = [sample(self.women, self.quantity) for elem in range(self.quantity)]
+        self.women_preferences = [sample(self.men, self.quantity) for elem in range(self.quantity)]
+        self.men_who_proposed = [[False] * quantity for elem in range(quantity)]
 
-# Preference lists (in ordered form)
-men_pref = [[1,2,0], [0,1,2], [2,1,0]]
-women_pref = [[0,2,1], [0,1,2], [2,0,1]]
+    def match_couples(self):
+        while False in self.engaged_men:
+            man = self.men[self.engaged_men.index(False)]
+            preferred_women = self.men_preferences[man]
+            for elem in preferred_women:
+                if not self.men_who_proposed[man][elem]:
+                    woman = self.women[elem]
+                    self.men_who_proposed[man][elem] = True
+                    if not self.engaged_women[woman]:
+                        self.engage(man, woman)
+                        break
+                    else: # woman is engaged
+                        other_man = self.get_fiance(woman)
+                        if self.rank_man(woman, man, other_man):
+                            self.engage(man, woman)
+                            self.engaged_men[other_man] = False
+                            break
 
-# Men who proposed
-men_prop_women = [[False, False, False], [False, False, False], [False, False, False]]
+    def engage(self, man, woman):
+        self.engaged_pairs[woman] = man
+        self.engaged_women[woman] = True
+        self.engaged_men[man] = True
 
-# List of tuples (man, woman)
-engaged_pairs = []
+    def rank_man(self, woman, man1, man2):
+        preferred = self.women_preferences[woman]
+        return preferred.index(man1) < preferred.index(man2)
 
-# This is pretty much pseudocode
-def matching_couples():
-    while False in engaged_men:
-        man = men[engaged_men.index(False)]
-        preferred_women = women_pref[man]
-        for elem in preferred_women:
-            if not men_prop_women[elem]:
-                woman = women[elem]
-                men_prop_women[man][elem] = True
-                if not engaged_women[woman]:
-                    engage(man, woman)
-                    break
-            # if woman is engaged:
-            else:
-                other_man = get_man(woman)
-                if ranking(woman, man, other_man):
-                    engage(man, woman)
-                    break
-    print(engaged_pairs)
-    print("Job done!")
+    def get_fiance(self, woman):
+        return self.engaged_pairs[woman]
 
-def engage(man, woman):
-    engaged_pairs.append((man, woman))
+def test_class():
+    c = StableMatch(10)
+    c.match_couples()
+    sorted_couples = sorted(list(c.engaged_pairs.items()))
+    #print(f'quantity: {c.quantity}')
+    #print(f'men who proposed: {c.men_who_proposed}')
+    #print(f'men preferences: {c.men_preferences}')
+    #print(f'women preferences: {c.women_preferences}')
+    print(f'engaged pairs: {sorted_couples}')
 
-def ranking(woman, man1, man2):
-    rank = women_pref[woman]
-    return rank.index(man1) < rank.index(man2)
-
-def get_man(woman):
-    pass
-
-matching_couples()
+test_class()
